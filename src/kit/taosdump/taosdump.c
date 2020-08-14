@@ -968,7 +968,7 @@ void* taosDumpOutWorkThreadFp(void *arg)
     return NULL;
   }
 
-  fprintf(fp, "USE %s\n\n", pThread->dbName);
+  fprintf(fp, "USE %s;\n\n", pThread->dbName);
   while (read(fd, &tableRecord, sizeof(STableRecord)) > 0) {
     taosDumpTable(tableRecord.name, tableRecord.metric, &tsArguments, fp, pThread->taosCon);
   }
@@ -1129,7 +1129,7 @@ int taosDumpDb(SDbInfo *dbInfo, struct arguments *arguments, FILE *fp, TAOS *tao
     return -1;
   }
 
-  fprintf(fp, "USE %s\n\n", dbInfo->name);
+  fprintf(fp, "USE %s;\n\n", dbInfo->name);
   
   (void)taosDumpCreateSuperTableClause(taosCon, dbInfo->name, fp);
 
