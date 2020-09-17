@@ -314,6 +314,14 @@ void tsdbCleanupQueryHandle(TsdbQueryHandleT queryHandle);
  */
 void tsdbReportStat(void *repo, int64_t *totalPoints, int64_t *totalStorage, int64_t *compStorage);
 
+// ------------------ tsdbScan.c
+typedef void *STsdbScanH;
+
+STsdbScanH tsdbNewScanHandle();
+void       tsdbFreeScanHandle(STsdbScanH pScanH);
+void       tsdbSetScanLogStream(STsdbScanH pScanH, FILE *fLogStream);
+int        tsdbScanFGroup(STsdbScanH pScanH, char *rootDir, int fid);
+
 #ifdef __cplusplus
 }
 #endif

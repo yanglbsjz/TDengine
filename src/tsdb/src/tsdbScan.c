@@ -17,20 +17,9 @@
 
 #ifndef _TSDB_PLUGINS
 
-int tsdbScanFGroup(STsdbScanHandle* pScanHandle, char* rootDir, int fid) { return 0; }
-
-STsdbScanHandle* tsdbNewScanHandle() { return NULL; }
-
-void tsdbSetScanLogStream(STsdbScanHandle* pScanHandle, FILE* fLogStream) {}
-
-int tsdbSetAndOpenScanFile(STsdbScanHandle* pScanHandle, char* rootDir, int fid) { return 0; }
-
-int tsdbScanSCompIdx(STsdbScanHandle* pScanHandle) { return 0; }
-
-int tsdbScanSCompBlock(STsdbScanHandle* pScanHandle, int idx) { return 0; }
-
-int tsdbCloseScanFile(STsdbScanHandle* pScanHandle) { return 0; }
-
-void tsdbFreeScanHandle(STsdbScanHandle* pScanHandle) {}
+STsdbScanH tsdbNewScanHandle() { return NULL; }
+void       tsdbFreeScanHandle(STsdbScanH pScanHandle) {}
+void       tsdbSetScanLogStream(STsdbScanH pScanHandle, FILE *fLogStream) { return; }
+int        tsdbScanFGroup(STsdbScanH pScanHandle, char *rootDir, int fid) { return 0; }
 
 #endif

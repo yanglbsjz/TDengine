@@ -562,16 +562,6 @@ STsdbMeta*  tsdbGetMeta(TSDB_REPO_T* pRepo);
 STsdbFileH* tsdbGetFile(TSDB_REPO_T* pRepo);
 int         tsdbCheckCommit(STsdbRepo* pRepo);
 
-// ------------------ tsdbScan.c
-int              tsdbScanFGroup(STsdbScanHandle* pScanHandle, char* rootDir, int fid);
-STsdbScanHandle* tsdbNewScanHandle();
-void             tsdbSetScanLogStream(STsdbScanHandle* pScanHandle, FILE* fLogStream);
-int              tsdbSetAndOpenScanFile(STsdbScanHandle* pScanHandle, char* rootDir, int fid);
-int              tsdbScanSCompIdx(STsdbScanHandle* pScanHandle);
-int              tsdbScanSCompBlock(STsdbScanHandle* pScanHandle, int idx);
-int              tsdbCloseScanFile(STsdbScanHandle* pScanHandle);
-void             tsdbFreeScanHandle(STsdbScanHandle* pScanHandle);
-
 #ifdef __cplusplus
 }
 #endif
