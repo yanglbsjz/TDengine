@@ -4059,7 +4059,7 @@ static void updateWindowResNumOfRes(SQueryRuntimeEnv *pRuntimeEnv) {
   }
 }
 
-static void stableApplyFunctionsOnBlock(SQueryRuntimeEnv *pRuntimeEnv, SDataBlockInfo *pDataBlockInfo, SDataStatis *pStatis,
+static UNUSED_FUNC void stableApplyFunctionsOnBlock(SQueryRuntimeEnv *pRuntimeEnv, SDataBlockInfo *pDataBlockInfo, SDataStatis *pStatis,
     SArray *pDataBlock, __block_search_fn_t searchFn) {
   SQuery *         pQuery = pRuntimeEnv->pQuery;
   STableQueryInfo* pTableQueryInfo = pQuery->current;
@@ -4641,15 +4641,15 @@ static FORCE_INLINE void setEnvForEachBlock(SQInfo* pQInfo, STableQueryInfo* pTa
 
 static int64_t scanMultiTableDataBlocks(SQInfo *pQInfo) {
   SQueryRuntimeEnv *pRuntimeEnv = &pQInfo->runtimeEnv;
-  SQuery*           pQuery = pRuntimeEnv->pQuery;
+//  SQuery*           pQuery = pRuntimeEnv->pQuery;
   SQueryCostInfo*   summary  = &pRuntimeEnv->summary;
 
   int64_t st = taosGetTimestampMs();
 
   TsdbQueryHandleT pQueryHandle = IS_MASTER_SCAN(pRuntimeEnv)? pRuntimeEnv->pQueryHandle : pRuntimeEnv->pSecQueryHandle;
-  SDataBlockInfo blockInfo = SDATA_BLOCK_INITIALIZER;
+//  SDataBlockInfo blockInfo = SDATA_BLOCK_INITIALIZER;
 
-  int32_t step = GET_FORWARD_DIRECTION_FACTOR(pQuery->order.order);
+//  int32_t step = GET_FORWARD_DIRECTION_FACTOR(pQuery->order.order);
 
   while (tsdbNextDataBlock(pQueryHandle)) {
     summary->totalBlocks += 1;
@@ -4658,50 +4658,50 @@ static int64_t scanMultiTableDataBlocks(SQInfo *pQInfo) {
       longjmp(pRuntimeEnv->env, TSDB_CODE_TSC_QUERY_CANCELLED);
     }
 
-    tsdbRetrieveDataBlockInfo(pQueryHandle, &blockInfo);
-    STableQueryInfo **pTableQueryInfo = (STableQueryInfo**) taosHashGet(pQInfo->tableqinfoGroupInfo.map, &blockInfo.tid, sizeof(blockInfo.tid));
-    if(pTableQueryInfo == NULL) {
-      break;
-    }
-
-    pQuery->current = *pTableQueryInfo;
-    if (QUERY_IS_ASC_QUERY(pQuery)) {
-      assert(
-          ((*pTableQueryInfo)->win.skey <= (*pTableQueryInfo)->win.ekey) &&
-          ((*pTableQueryInfo)->lastKey >= (*pTableQueryInfo)->win.skey) &&
-          ((*pTableQueryInfo)->win.skey >= pQuery->window.skey && (*pTableQueryInfo)->win.ekey <= pQuery->window.ekey));
-    } else {
-      assert(
-          ((*pTableQueryInfo)->win.skey >= (*pTableQueryInfo)->win.ekey) &&
-          ((*pTableQueryInfo)->lastKey <= (*pTableQueryInfo)->win.skey) &&
-          ((*pTableQueryInfo)->win.skey <= pQuery->window.skey && (*pTableQueryInfo)->win.ekey >= pQuery->window.ekey));
-    }
-
-    if (!pRuntimeEnv->groupbyNormalCol) {
-      setEnvForEachBlock(pQInfo, *pTableQueryInfo, &blockInfo);
-    }
-
-    uint32_t     status = 0;
-    SDataStatis *pStatis = NULL;
-    SArray      *pDataBlock = NULL;
-
-    int32_t ret = loadDataBlockOnDemand(pRuntimeEnv, &pQuery->current->windowResInfo, pQueryHandle, &blockInfo, &pStatis, &pDataBlock, &status);
-    if (ret != TSDB_CODE_SUCCESS) {
-      break;
-    }
-
-    if (status == BLK_DATA_DISCARD) {
-      pQuery->current->lastKey = QUERY_IS_ASC_QUERY(pQuery)? blockInfo.window.ekey + step : blockInfo.window.skey + step;
-      continue;
-    }
-
-    summary->totalRows += blockInfo.rows;
-    stableApplyFunctionsOnBlock(pRuntimeEnv, &blockInfo, pStatis, pDataBlock, binarySearchForKey);
-
-    qDebug("QInfo:%p check data block completed, uid:%"PRId64", tid:%d, brange:%" PRId64 "-%" PRId64 ", numOfRows:%d, "
-           "lastKey:%" PRId64,
-           pQInfo, blockInfo.uid, blockInfo.tid, blockInfo.window.skey, blockInfo.window.ekey, blockInfo.rows,
-           pQuery->current->lastKey);
+//    tsdbRetrieveDataBlockInfo(pQueryHandle, &blockInfo);
+//    STableQueryInfo **pTableQueryInfo = (STableQueryInfo**) taosHashGet(pQInfo->tableqinfoGroupInfo.map, &blockInfo.tid, sizeof(blockInfo.tid));
+//    if(pTableQueryInfo == NULL) {
+//      break;
+//    }
+//
+//    pQuery->current = *pTableQueryInfo;
+//    if (QUERY_IS_ASC_QUERY(pQuery)) {
+//      assert(
+//          ((*pTableQueryInfo)->win.skey <= (*pTableQueryInfo)->win.ekey) &&
+//          ((*pTableQueryInfo)->lastKey >= (*pTableQueryInfo)->win.skey) &&
+//          ((*pTableQueryInfo)->win.skey >= pQuery->window.skey && (*pTableQueryInfo)->win.ekey <= pQuery->window.ekey));
+//    } else {
+//      assert(
+//          ((*pTableQueryInfo)->win.skey >= (*pTableQueryInfo)->win.ekey) &&
+//          ((*pTableQueryInfo)->lastKey <= (*pTableQueryInfo)->win.skey) &&
+//          ((*pTableQueryInfo)->win.skey <= pQuery->window.skey && (*pTableQueryInfo)->win.ekey >= pQuery->window.ekey));
+//    }
+//
+//    if (!pRuntimeEnv->groupbyNormalCol) {
+//      setEnvForEachBlock(pQInfo, *pTableQueryInfo, &blockInfo);
+//    }
+//
+//    uint32_t     status = 0;
+//    SDataStatis *pStatis = NULL;
+//    SArray      *pDataBlock = NULL;
+//
+//    int32_t ret = loadDataBlockOnDemand(pRuntimeEnv, &pQuery->current->windowResInfo, pQueryHandle, &blockInfo, &pStatis, &pDataBlock, &status);
+//    if (ret != TSDB_CODE_SUCCESS) {
+//      break;
+//    }
+//
+//    if (status == BLK_DATA_DISCARD) {
+//      pQuery->current->lastKey = QUERY_IS_ASC_QUERY(pQuery)? blockInfo.window.ekey + step : blockInfo.window.skey + step;
+//      continue;
+//    }
+//
+//    summary->totalRows += blockInfo.rows;
+//    stableApplyFunctionsOnBlock(pRuntimeEnv, &blockInfo, pStatis, pDataBlock, binarySearchForKey);
+//
+//    qDebug("QInfo:%p check data block completed, uid:%"PRId64", tid:%d, brange:%" PRId64 "-%" PRId64 ", numOfRows:%d, "
+//           "lastKey:%" PRId64,
+//           pQInfo, blockInfo.uid, blockInfo.tid, blockInfo.window.skey, blockInfo.window.ekey, blockInfo.rows,
+//           pQuery->current->lastKey);
   }
 
   if (terrno != TSDB_CODE_SUCCESS) {

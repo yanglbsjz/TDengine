@@ -688,12 +688,12 @@ int main(int argc, char *argv[]) {
   }
   char command[BUFFER_SIZE] = "\0";
 
-  sprintf(command, "drop database %s;", db_name);
-  TAOS_RES* res = taos_query(taos, command);
-  taos_free_result(res);
+//  sprintf(command, "drop database %s;", db_name);
+//  TAOS_RES* res = taos_query(taos, command);
+//  taos_free_result(res);
 
-  sprintf(command, "create database %s replica %d;", db_name, replica);
-  res = taos_query(taos, command);
+  sprintf(command, "create database if not exists %s replica %d;", db_name, replica);
+  TAOS_RES* res = taos_query(taos, command);
   taos_free_result(res);
 
   char cols[STRING_LEN] = "\0";
@@ -843,10 +843,9 @@ int main(int argc, char *argv[]) {
     double dt = getCurrentTime() - dts;
     printf("Spent %.4f seconds to drop %d tables\n", dt, ntables);
 
-    FILE *fp = fopen(arguments.output_file, "a");
-    fprintf(fp, "Spent %.4f seconds to drop %d tables\n", dt, ntables);
-    fclose(fp);
-
+    FILE *fp1 = fopen(arguments.output_file, "a");
+    fprintf(fp1, "Spent %.4f seconds to drop %d tables\n", dt, ntables);
+    fclose(fp1);
   }
   
 
