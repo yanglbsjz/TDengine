@@ -808,7 +808,7 @@ static int32_t handleDataMergeIfNeeded(STsdbQueryHandle* pQueryHandle, SCompBloc
       return code;
     }
 
-//    doMergeTwoLevelData(pQueryHandle, pCheckInfo, pBlock);
+    doMergeTwoLevelData(pQueryHandle, pCheckInfo, pBlock);
   } else {
     /*
      * no data in cache, only load data from file
@@ -871,7 +871,7 @@ static int32_t loadFileDataBlock(STsdbQueryHandle* pQueryHandle, SCompBlock* pBl
       }
 
       assert(pCheckInfo->lastKey <= pBlock->keyLast);
-//      doMergeTwoLevelData(pQueryHandle, pCheckInfo, pBlock);
+      doMergeTwoLevelData(pQueryHandle, pCheckInfo, pBlock);
     } else {  // the whole block is loaded in to buffer
       cur->pos = ASCENDING_TRAVERSE(pQueryHandle->order)? 0:(pBlock->numOfRows - 1);
       code = handleDataMergeIfNeeded(pQueryHandle, pBlock, pCheckInfo);
@@ -891,7 +891,7 @@ static int32_t loadFileDataBlock(STsdbQueryHandle* pQueryHandle, SCompBlock* pBl
       }
 
       assert(pCheckInfo->lastKey >= pBlock->keyFirst);
-//      doMergeTwoLevelData(pQueryHandle, pCheckInfo, pBlock);
+      doMergeTwoLevelData(pQueryHandle, pCheckInfo, pBlock);
     } else {
       cur->pos = ASCENDING_TRAVERSE(pQueryHandle->order)? 0:(pBlock->numOfRows-1);
       code = handleDataMergeIfNeeded(pQueryHandle, pBlock, pCheckInfo);
