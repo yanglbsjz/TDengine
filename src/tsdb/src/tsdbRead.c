@@ -1274,7 +1274,7 @@ static UNUSED_FUNC void doMergeTwoLevelData(STsdbQueryHandle* pQueryHandle, STab
   int32_t step = ASCENDING_TRAVERSE(pQueryHandle->order)? 1:-1;
   int32_t numOfCols = (int32_t)(QH_GET_NUM_OF_COLS(pQueryHandle));
 
-  STable* pTable = pCheckInfo->pTableObj;
+//  STable* pTable = pCheckInfo->pTableObj;
   int32_t endPos = getEndPosInDataBlock(pQueryHandle, &blockInfo);
 
   tsdbDebug("%p uid:%" PRIu64",tid:%d start merge data block, file block range:%"PRIu64"-%"PRIu64" rows:%d, start:%d,"
