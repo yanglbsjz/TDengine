@@ -1366,7 +1366,7 @@ static UNUSED_FUNC void doMergeTwoLevelData(STsdbQueryHandle* pQueryHandle, STab
         int32_t start = -1, end = -1;
         getQualifiedRowsPos(pQueryHandle, pos, endPos, numOfRows, &start, &end);
 
-        numOfRows = doCopyRowsFromFileBlock(pQueryHandle, pQueryHandle->outputCapacity, numOfRows, start, end);
+//        numOfRows = doCopyRowsFromFileBlock(pQueryHandle, pQueryHandle->outputCapacity, numOfRows, start, end);
         pos += (end - start + 1) * step;
 
         cur->win.ekey = ASCENDING_TRAVERSE(pQueryHandle->order)? tsArray[end]:tsArray[start];
