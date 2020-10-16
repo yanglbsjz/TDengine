@@ -1313,7 +1313,7 @@ static UNUSED_FUNC void doMergeTwoLevelData(STsdbQueryHandle* pQueryHandle, STab
 
       if ((key < tsArray[pos] && ASCENDING_TRAVERSE(pQueryHandle->order)) ||
           (key > tsArray[pos] && !ASCENDING_TRAVERSE(pQueryHandle->order))) {
-        copyOneRowFromMem(pQueryHandle, pQueryHandle->outputCapacity, numOfRows, row, numOfCols, pTable);
+//        copyOneRowFromMem(pQueryHandle, pQueryHandle->outputCapacity, numOfRows, row, numOfCols, pTable);
         numOfRows += 1;
         if (cur->win.skey == TSKEY_INITIAL_VAL) {
           cur->win.skey = key;
@@ -1342,7 +1342,7 @@ static UNUSED_FUNC void doMergeTwoLevelData(STsdbQueryHandle* pQueryHandle, STab
         int32_t qstart = 0, qend = 0;
         getQualifiedRowsPos(pQueryHandle, pos, end, numOfRows, &qstart, &qend);
 
-        numOfRows = doCopyRowsFromFileBlock(pQueryHandle, pQueryHandle->outputCapacity, numOfRows, qstart, qend);
+//        numOfRows = doCopyRowsFromFileBlock(pQueryHandle, pQueryHandle->outputCapacity, numOfRows, qstart, qend);
         pos += (qend - qstart + 1) * step;
 
         cur->win.ekey = ASCENDING_TRAVERSE(pQueryHandle->order)? tsArray[qend]:tsArray[qstart];
@@ -1366,7 +1366,7 @@ static UNUSED_FUNC void doMergeTwoLevelData(STsdbQueryHandle* pQueryHandle, STab
         int32_t start = -1, end = -1;
         getQualifiedRowsPos(pQueryHandle, pos, endPos, numOfRows, &start, &end);
 
-        numOfRows = doCopyRowsFromFileBlock(pQueryHandle, pQueryHandle->outputCapacity, numOfRows, start, end);
+//        numOfRows = doCopyRowsFromFileBlock(pQueryHandle, pQueryHandle->outputCapacity, numOfRows, start, end);
         pos += (end - start + 1) * step;
 
         cur->win.ekey = ASCENDING_TRAVERSE(pQueryHandle->order)? tsArray[end]:tsArray[start];
