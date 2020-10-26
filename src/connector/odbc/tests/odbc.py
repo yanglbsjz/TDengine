@@ -1,5 +1,6 @@
 import pyodbc
-cnxn = pyodbc.connect('DSN=TAOS_DSN;UID=root;PWD=taosdata', autocommit=True)
+# cnxn = pyodbc.connect('DSN={TAOS_DSN};UID={ root };PWD={ taosdata };HOST={ localhost:6030 }', autocommit=True)
+cnxn = pyodbc.connect('DSN={TAOS_DSN}; UID=root;PWD=taosdata; HOST=localhost:6030', autocommit=True)
 cnxn.setdecoding(pyodbc.SQL_CHAR, encoding='utf-8')
 #cnxn.setdecoding(pyodbc.SQL_WCHAR, encoding='utf-8')
 #cnxn.setencoding(encoding='utf-8')
@@ -116,5 +117,15 @@ row = cursor.fetchone()
 while row:
     print(row)
     row = cursor.fetchone()
+cursor.close()
+
+cursor = cnxn.cursor()
+cursor.execute("create table db.f (ts timestamp, v1 float)")
+cursor.close()
+
+params = [ ('2020-10-20 00:00:10', '123.3') ]
+cursor = cnxn.cursor()
+cursor.fast_executemany = True
+cursor.executemany("insert into db.f values (?, ?)", params)
 cursor.close()
 
