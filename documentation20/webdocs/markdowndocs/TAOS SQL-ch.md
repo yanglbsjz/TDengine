@@ -30,12 +30,12 @@ taos> DESCRIBE meters;
 使用TDengine，最重要的是时间戳。创建并插入记录、查询历史记录的时候，均需要指定时间戳。时间戳有如下规则：
 
 - 时间格式为```YYYY-MM-DD HH:mm:ss.MS```, 默认时间分辨率为毫秒。比如：```2017-08-12 18:25:58.128```
-- 内部函数now是服务器的当前时间
-- 插入记录时，如果时间戳为now，插入数据时使用服务器当前时间
+- 内部函数now是写入 SQL 语句的客户端当前时间
+- 插入记录时，如果时间戳为now，插入数据时使用客户端的当前时间
 - Epoch Time: 时间戳也可以是一个长整数，表示从1970-01-01 08:00:00.000开始的毫秒数
 - 时间可以加减，比如 now-2h，表明查询时刻向前推2个小时(最近2小时)。 数字后面的时间单位可以是 a(毫秒)、s(秒)、 m(分)、h(小时)、d(天)、w(周)。 比如select * from t1 where ts > now-2w and ts <= now-1w, 表示查询两周前整整一周的数据。 在指定降频操作(down sampling)的时间窗口(interval)时，时间单位还可以使用 n(自然月) 和 y(自然年)。
 
-TDengine缺省的时间戳是毫秒精度，但通过修改配置参数enableMicrosecond就可支持微秒。
+TDengine缺省的时间戳是毫秒精度（可通过```SHOW DATABASES``` 命令查看数据库的配置精度，该参数在创建库的时候设置且不能修改，如果不指定默认使用毫秒精度）。
 
 在TDengine中，普通表的数据模型中可使用以下10种数据类型。 
 
@@ -105,9 +105,9 @@ TDengine缺省的时间戳是毫秒精度，但通过修改配置参数enableMic
     ```mysql
     ALTER DATABASE db_name BLOCKS 100;
     ```
-    BLOCKS参数是每个VNODE (TSDB) 中有多少cache大小的内存块，因此一个VNODE的用的内存大小粗略为（cache * blocks）。取值范围[3, 1000]。
+    BLOCKS参数是每个虚拟节点（virtual node, vnode）中有cache块的大小。每个虚拟节点配置的内存大小可粗略估算为（cache * blocks）。BLOCKS 参数的取值范围是[3, 1000]。
 
-    **Tips**: 以上所有参数修改后都可以用show databases来确认是否修改成功。
+    **Tips**: 以上所有参数修改后都可以用```show databases```来确认是否修改成功。
 
 
 - **显示系统所有数据库**
@@ -165,7 +165,7 @@ TDengine缺省的时间戳是毫秒精度，但通过修改配置参数enableMic
     ```
     如果表是通过[超级表](../super-table/)创建，更改表结构的操作只能对超级表进行。同时针对超级表的结构更改对所有通过该结构创建的表生效。对于不是通过超级表创建的表，可以直接修改表结构
 
-## 超级表STable管理
+## 超级表（STable）管理
 - **创建超级表**
   
     ```mysql
@@ -211,7 +211,7 @@ TDengine缺省的时间戳是毫秒精度，但通过修改配置参数enableMic
     ALTER TABLE stb_name DROP COLUMN field_name; 
     ```
 
-## 超级表 STable 中 TAG 管理
+## 超级表标签（TAGS）管理
 - **添加标签**
   
     ```mysql
@@ -286,8 +286,8 @@ TDengine缺省的时间戳是毫秒精度，但通过修改配置参数enableMic
     同时向表tb1_name和tb2_name中按列分别插入多条记录 
 
     注意：
-    1) 如果时间戳为0，系统将自动使用服务器当前时间作为该记录的时间戳；
-    2) 允许插入的最老记录的时间戳，是相对于当前服务器时间，减去配置的keep值（数据保留的天数），允许插入的最新记录的时间戳，是相对于当前服务器时间，加上配置的days值（数据文件存储数据的时间跨度，单位为天）。keep和days都是可以在创建数据库时指定的，缺省值分别是3650天和10天。
+    1) 允许插入的最老记录的时间戳，是相对于当前服务器时间，减去配置的keep值（数据保留的天数），允许插入的最新记录的时间戳，是相对于当前服务器时间，加上配置的days值（数据文件存储数据的时间跨度，单位为天）。keep和days都是可以在创建数据库时指定的，缺省值分别是3650天和10天。
+    2）如果写入SQL语句时候使用 ``now``，``now`` 是输入 SQL 语句的客户端（或应用所在服务器的）当前时间。如果是用 REST 的方式写入数据，则 ```now``` 的时间是服务器的当前时间。
 
 **历史记录写入**：可使用IMPORT或者INSERT命令，IMPORT的语法，功能与INSERT完全一样。
 
@@ -367,6 +367,7 @@ Query OK, 9 row(s) in set (0.002022s)
 
 
 通配符支持表名前缀，以下两个SQL语句均为返回全部的列：
+
 ```mysql
 SELECT * FROM d1001;
 SELECT d1001.* FROM d1001;
@@ -443,7 +444,9 @@ taos> SELECT database();
  power                          |
 Query OK, 1 row(s) in set (0.000079s)
 ```
+
 如果登录的时候没有指定默认数据库，且没有使用```use```命令切换数据，则返回NULL。
+
 ```
 taos> SELECT database();
            database()           |
@@ -451,6 +454,7 @@ taos> SELECT database();
  NULL                           |
 Query OK, 1 row(s) in set (0.000184s)
 ```
+
 获取服务器和客户端版本号:
 ```
 taos> SELECT client_version();
@@ -465,7 +469,9 @@ taos> SELECT server_version();
  2.0.0.0          |
 Query OK, 1 row(s) in set (0.000077s)
 ```
-服务器状态检测语句。如果服务器正常，返回一个数字（例如 1）。如果服务器异常，返回error code。该SQL语法能兼容连接池对于TDengine状态的检查及第三方工具对于数据库服务器状态的检查。并可以避免出现使用了错误的心跳检测SQL语句导致的连接池连接丢失的问题。
+
+服务器状态检测语句。如果服务器正常，返回一个数字（例如 1）。如果服务器异常，返回error code。该SQL语法能兼容连接池对于TDengine状态的检查及第三方工具对于数据库服务器状态的检查。
+
 ```
 taos> SELECT server_status();
  server_status() |
@@ -486,6 +492,7 @@ Query OK, 1 row(s) in set (0.000081s)
 
 #### 小技巧
 获取一个超级表所有的子表名及相关的标签信息：
+
 ```
 SELECT TBNAME, location FROM meters;
 ```
@@ -493,6 +500,7 @@ SELECT TBNAME, location FROM meters;
 ```
 SELECT COUNT(TBNAME) FROM meters;
 ```
+
 以上两个查询均只支持在Where条件子句中添加针对标签（TAGS）的过滤条件。例如：
 ```
 taos> SELECT TBNAME, location FROM meters;
@@ -530,7 +538,7 @@ Query OK, 1 row(s) in set (0.001091s)
 | %         | match with any char sequences | **`binary`** **`nchar`**              |
 | _         | match with a single char      | **`binary`** **`nchar`**              |
 
-1. 同时进行多个字段的范围过滤需要使用关键词AND进行连接不同的查询条件，暂不支持OR连接的不同列之间的查询过滤条件。
+1. 同时进行多个字段的范围过滤需要使用关键词AND进行连接不同的查询条件，暂不支持OR连接的不同列之间的查询过滤条件，如果使用 OR 连接不同的列的过滤条件，系统自动转化为 AND 语意进行处理并不报告错误。
 2. 针对某一字段的过滤只支持单一时间区间过滤条件。但是针对其他的（普通）列或标签列，可以使用``` OR``` 条件进行组合条件的查询过滤。例如：((value > 20 and value < 30)  OR (value < 12)) 。
 
 ### SQL 示例 
