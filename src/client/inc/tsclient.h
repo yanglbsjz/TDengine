@@ -369,6 +369,7 @@ typedef struct SSqlObj {
 
   SSubqueryState   subState;
   struct SSqlObj **pSubs;
+  struct SSqlObj  *parent;
 
   struct SSqlObj  *prev, *next;
   struct SSqlObj **self;

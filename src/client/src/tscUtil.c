@@ -347,6 +347,7 @@ static void tscFreeSubobj(SSqlObj* pSql) {
 
   for(int32_t i = 0; i < pSql->subState.numOfSub; ++i) {
     tscDebug("%p free sub SqlObj:%p, index:%d", pSql, pSql->pSubs[i], i);
+    pSql->pSubs[i]->parent = NULL;
     taos_free_result(pSql->pSubs[i]);
     pSql->pSubs[i] = NULL;
   }
@@ -408,6 +409,16 @@ void tscFreeSqlObj(SSqlObj* pSql) {
   pSql->res.code = TSDB_CODE_TSC_QUERY_CANCELLED;
 
   tscFreeSubobj(pSql);
+  if (pSql->parent != NULL) {
+    SSqlObj* parent = pSql->parent;
+    for (int32_t i = 0; i < parent->subState.numOfSub; ++i) {
+      if (parent->pSubs[i] == pSql) {
+        tscDebug("%p subquery (%d) is removed from parent %p", pSql, i, parent);
+        parent->pSubs[i] = NULL;
+        break;
+      }
+    }
+  }
 
   SSqlCmd* pCmd = &pSql->cmd;
   int32_t cmd = pCmd->command;
@@ -1859,6 +1870,7 @@ SSqlObj* createSimpleSubObj(SSqlObj* pSql, void (*fp)(), void* param, int32_t cm
   tscAddTableMetaInfo(pQueryInfo, pMasterTableMetaInfo->name, NULL, NULL, NULL, NULL);
 
   registerSqlObj(pNew);
+  pNew->parent = pSql;
   return pNew;
 }
 
@@ -2068,6 +2080,7 @@ SSqlObj* createSubqueryObj(SSqlObj* pSql, int16_t tableIndex, void (*fp)(), void
   }
 
   registerSqlObj(pNew);
+  pNew->parent = pSql;
   return pNew;
 
 _error:
