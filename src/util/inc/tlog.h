@@ -49,6 +49,8 @@ void    taosPrintLongString(const char * flags, int32_t dflag, const char *forma
 
 void    taosDumpData(unsigned char *msg, int32_t len);
 
+#define userLog(...) { taosPrintLog("USR ", 255, __VA_ARGS__); }
+
 #ifdef __cplusplus
 }
 #endif

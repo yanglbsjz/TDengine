@@ -60,6 +60,7 @@ char    tsCharset[TSDB_LOCALE_LEN] = {0};  // default encode string
 int32_t tsEnableCoreFile = 0;
 int32_t tsMaxBinaryDisplayWidth = 30;
 char    tsTempDir[TSDB_FILENAME_LEN] = "/tmp/";
+int32_t tsFirstBoot = 0;
 
 /*
  * denote if the server needs to compress response message at the application layer to client, including query rsp,
@@ -1368,9 +1369,14 @@ int32_t taosCheckGlobalCfg() {
 
   if (tsFirst[0] == 0) {
     strcpy(tsFirst, tsLocalEp);
+    taosGetFqdnPortFromEp(tsFirst, fqdn, &port);
   } else {
     taosGetFqdnPortFromEp(tsFirst, fqdn, &port);
     snprintf(tsFirst, sizeof(tsFirst), "%s:%u", fqdn, port);
+  }
+
+  if(tscEmbedded && tsFirstBoot && strcmp(fqdn, tsLocalFqdn)){
+    userLog("Dnode %s is goning to join the cluster %s belongs, make sure this is what you want", tsLocalFqdn, fqdn);
   }
 
   if (tsSecond[0] == 0) {

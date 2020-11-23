@@ -58,6 +58,7 @@ static uint32_t   tsRebootTime;
 static taos_qset  tsMgmtQset = NULL;
 static taos_queue tsMgmtQueue = NULL;
 static pthread_t  tsQthread;
+static uint32_t   tsNumOfLostConn = 0;
 
 static void   dnodeProcessStatusRsp(SRpcMsg *pMsg);
 static void   dnodeSendStatusMsg(void *handle, void *tmrId);
@@ -467,8 +468,29 @@ static int32_t dnodeProcessCreateMnodeMsg(SRpcMsg *pMsg) {
 static void dnodeProcessStatusRsp(SRpcMsg *pMsg) {
   if (pMsg->code != TSDB_CODE_SUCCESS) {
     dError("status rsp is received, error:%s", tstrerror(pMsg->code));
+    if(pMsg->code == TSDB_CODE_RPC_NETWORK_UNAVAIL) {
+      tsNumOfLostConn++;
+      if(tsNumOfLostConn && (tsNumOfLostConn % 10 == 0)) {
+        if(tsFirstBoot) {
+          userLog("Dnode has not joined the cluster yet, check the network/configuration and the other dnode status in cluster");
+        } else {
+          userLog("Dnode lost connection to the mnode, check the network and the other dnode status in cluster");
+        }
+      }
+    }
     taosTmrReset(dnodeSendStatusMsg, tsStatusInterval * 1000, NULL, tsDnodeTmr, &tsStatusTimer);
     return;
+  }
+
+  if(tsNumOfLostConn) {
+    if(tsNumOfLostConn >= 10) {
+      if(tsFirstBoot) {
+        userLog("Done has joined the cluster now");
+      } else {
+        userLog("Dnode's connection to the mnode is ok now");
+      }
+    }
+    tsNumOfLostConn = 0;
   }
 
   SStatusRsp *pStatusRsp = pMsg->pCont;

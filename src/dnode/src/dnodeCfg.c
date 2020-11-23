@@ -91,6 +91,7 @@ static int32_t dnodeReadCfg() {
   fp = fopen(file, "r");
   if (!fp) {
     dDebug("failed to read %s, file not exist", file);
+    tsFirstBoot = 1;
     goto PARSE_CFG_OVER;
   }
 

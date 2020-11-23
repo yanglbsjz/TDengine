@@ -1372,7 +1372,9 @@ static void rpcProcessRetryTimer(void *param, void *tmrId) {
       // close the connection
       tDebug("%s, failed to send msg:%s to %s:%hu", pConn->info, taosMsg[pConn->outType], pConn->peerFqdn, pConn->peerPort);
       if (pConn->pContext) {
-        pConn->pContext->code = TSDB_CODE_RPC_NETWORK_UNAVAIL;
+        if(pConn->pContext->code == 0) {
+          pConn->pContext->code = TSDB_CODE_RPC_NETWORK_UNAVAIL;
+        }	      
         pConn->pContext->pConn = NULL;
         pConn->pReqMsg = NULL;
         taosTmrStart(rpcProcessConnError, 0, pConn->pContext, pRpc->tmrCtrl);

@@ -53,6 +53,7 @@ extern char     tsCharset[];            // default encode string
 extern int32_t  tsEnableCoreFile;
 extern int32_t  tsCompressMsgSize;
 extern char     tsTempDir[];
+extern int32_t  tsFirstBoot;
 
 //query buffer management
 extern int32_t  tsQueryBufferSize;      // maximum allowed usage buffer for each data node during query processing

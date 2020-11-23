@@ -160,6 +160,10 @@ static int dnodeRetrieveUserAuthInfo(char *user, char *spi, char *encrypt, char 
 
   if (rpcRsp.code != 0) {
     dError("user:%s, auth msg received from mnodes, error:%s", user, tstrerror(rpcRsp.code));
+    if(rpcRsp.code == TSDB_CODE_RPC_NETWORK_UNAVAIL) {
+      dError("all mnodes unreachable, dnode not ready");
+      rpcRsp.code = TSDB_CODE_RPC_NOT_READY;
+    }
   } else {
     SAuthRsp *pRsp = rpcRsp.pCont;
     dDebug("user:%s, auth msg received from mnodes", user);
