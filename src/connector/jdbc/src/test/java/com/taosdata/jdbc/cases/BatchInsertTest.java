@@ -19,7 +19,7 @@ import static org.junit.Assert.assertEquals;
 public class BatchInsertTest {
 
     static String host = "localhost";
-    static String dbName = "test";
+    static String dbName = "batch_insert_test";
     static String stbName = "meters";
     static int numOfTables = 30;
     final static int numOfRecordsPerTable = 1000;
@@ -41,34 +41,35 @@ public class BatchInsertTest {
     }
 
     @Test
-    public void testBatchInsert(){
+    public void testBatchInsert() {
+        //create a thread pool, size: 30
         ExecutorService executorService = Executors.newFixedThreadPool(numOfTables);
+
+        //
         for (int i = 0; i < numOfTables; i++) {
-            final int index = i;
-            executorService.execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        long startTime = System.currentTimeMillis();
-                        Statement statement = connection.createStatement(); // get statement
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("INSERT INTO " + tablePrefix + index + " VALUES");
-                        Random rand = new Random();
-                        for (int j = 1; j <= numOfRecordsPerTable; j++) {
-                            sb.append("(" + (ts + j) + ", ");
-                            sb.append(rand.nextInt(100) + ", ");
-                            sb.append(rand.nextInt(100) + ", ");
-                            sb.append(rand.nextInt(100) + ")");
-                        }
-                        statement.addBatch(sb.toString());
-                        statement.executeBatch();
-                        long endTime = System.currentTimeMillis();
-                        System.out.println("Thread " + index + " takes " + (endTime - startTime) +  " microseconds");
-                        connection.commit();
-                        statement.close();
-                    } catch (Exception e) {
-                        e.printStackTrace();
+            final int tbIndex = i;
+
+            executorService.execute(() -> {
+                try {
+                    long startTime = System.currentTimeMillis();
+                    Statement statement = connection.createStatement(); // get statement
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("INSERT INTO " + tablePrefix + tbIndex + " VALUES");
+                    Random rand = new Random();
+                    for (int j = 1; j <= numOfRecordsPerTable; j++) {
+                        sb.append("(" + (ts + j) + ", ");
+                        sb.append(rand.nextInt(100) + ", ");
+                        sb.append(rand.nextInt(100) + ", ");
+                        sb.append(rand.nextInt(100) + ")");
                     }
+                    statement.addBatch(sb.toString());
+                    statement.executeBatch();
+                    long endTime = System.currentTimeMillis();
+                    System.out.println("Thread " + tbIndex + " takes " + (endTime - startTime) + " microseconds");
+                    connection.commit();
+                    statement.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             });
         }
@@ -80,7 +81,7 @@ public class BatchInsertTest {
             e.printStackTrace();
         }
 
-        try{
+        try {
             Statement statement = connection.createStatement();
             ResultSet rs = statement.executeQuery("select * from meters");
             int num = 0;
@@ -89,7 +90,7 @@ public class BatchInsertTest {
             }
             assertEquals(num, numOfTables * numOfRecordsPerTable);
             rs.close();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

@@ -116,8 +116,8 @@
                         <include>**/*Test.java</include>
                     </includes>
                     <excludes>
-                        <exclude>**/BatchInsertTest.java</exclude>
-                        <exclude>**/FailOverTest.java</exclude>
+                        <exclude>com/taosdata/jdbc/cases/BatchInsertTest.java</exclude>
+                        <exclude>com/taosdata/jdbc/cases/FailOverTest.java</exclude>
                     </excludes>
                     <testFailureIgnore>true</testFailureIgnore>
                 </configuration>
